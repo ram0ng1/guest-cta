@@ -26,6 +26,44 @@ const openLogin = () =>
 const openSignUp = () =>
   flarum.reg.asyncModuleImport('flarum/forum/components/SignUpModal').then((M) => app.modal.show(M));
 
+// Build the lock placeholder span used in place of (or alongside) gated links.
+const buildPlaceholder = (label) => {
+  const placeholder = document.createElement('span');
+  placeholder.className = 'GuestCtaLink';
+  placeholder.setAttribute('data-guestcta-gated', '1');
+  placeholder.setAttribute('role', 'button');
+  placeholder.tabIndex = 0;
+
+  const icon = document.createElement('i');
+  icon.className = 'fas fa-lock';
+  icon.setAttribute('aria-hidden', 'true');
+
+  const text = document.createElement('span');
+  text.className = 'GuestCtaLink-label';
+  text.textContent = label;
+
+  placeholder.appendChild(icon);
+  placeholder.appendChild(text);
+
+  placeholder.addEventListener('click', openLogin);
+  placeholder.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') openLogin();
+  });
+
+  return placeholder;
+};
+
+// A link is "raw" when its visible text is just the URL itself (or empty).
+// In that case there's no descriptive context to preserve, so we replace the
+// whole link with the placeholder — otherwise we'd leave an ugly bare URL.
+const isRawUrlLink = (link) => {
+  const text = (link.textContent || '').trim();
+  if (!text) return true;
+  if (text === link.href) return true;
+  if (/^https?:\/\//i.test(text)) return true;
+  return false;
+};
+
 // Replace external links inside post bodies with a clickable lock placeholder.
 // data-guestcta-gated prevents double-processing on onupdate redraws.
 const gateGuestLinks = (component) => {
@@ -41,29 +79,24 @@ const gateGuestLinks = (component) => {
   body.querySelectorAll('a[href]:not([data-guestcta-gated])').forEach((link) => {
     if (!isExternalLink(link)) return;
 
-    const placeholder = document.createElement('span');
-    placeholder.className = 'GuestCtaLink';
-    placeholder.setAttribute('data-guestcta-gated', '1');
-    placeholder.setAttribute('role', 'button');
-    placeholder.tabIndex = 0;
+    const placeholder = buildPlaceholder(label);
+    const parent = link.parentNode;
+    if (!parent) return;
 
-    const icon = document.createElement('i');
-    icon.className = 'fas fa-lock';
-    icon.setAttribute('aria-hidden', 'true');
+    if (isRawUrlLink(link)) {
+      parent.replaceChild(placeholder, link);
+      return;
+    }
 
-    const text = document.createElement('span');
-    text.className = 'GuestCtaLink-label';
-    text.textContent = label;
-
-    placeholder.appendChild(icon);
-    placeholder.appendChild(text);
-
-    placeholder.addEventListener('click', openLogin);
-    placeholder.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') openLogin();
-    });
-
-    link.parentNode.replaceChild(placeholder, link);
+    // Preserve the original link's visible text/markup so the surrounding
+    // sentence still makes sense, then append " (placeholder)" right after.
+    while (link.firstChild) {
+      parent.insertBefore(link.firstChild, link);
+    }
+    parent.insertBefore(document.createTextNode(' ('), link);
+    parent.insertBefore(placeholder, link);
+    parent.insertBefore(document.createTextNode(')'), link);
+    parent.removeChild(link);
   });
 };
 

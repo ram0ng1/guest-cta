@@ -4,8 +4,8 @@ ramon-guest-cta:
       hide_links_label: Ocultar links para visitantes
       hide_links_help: Impedir que visitantes acessem links nos posts. Ao clicar em um link, é exibido um botão de Login / Cadastro.
 
-      show_post_cta_label: Mostrar CTA "Junte-se" após o primeiro post para visitantes
-      show_post_cta_help: Exibe um card de Login / Cadastro após o primeiro post de uma discussão, visível apenas para visitantes.
+      show_post_cta_label: Mostrar CTA "Junte-se" após um determinado número de posts para visitantes
+      show_post_cta_help: Exibe um card de Login / Cadastro entre os posts de uma discussão, visível apenas para visitantes. Use a posição para escolher após qual post ele aparece.
 
       position_label: Posição do CTA (após qual número de post)
       position_help: Insere o banner de CTA entre este número de post e o próximo.

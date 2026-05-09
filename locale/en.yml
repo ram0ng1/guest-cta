@@ -4,8 +4,8 @@ ramon-guest-cta:
       hide_links_label: Hide links for guests
       hide_links_help: Prevent guests from following links in posts. Clicking a link shows a Login / Sign Up prompt instead.
 
-      show_post_cta_label: Show Join CTA after first post for guests
-      show_post_cta_help: Display a Log In / Sign Up card after the first post in a discussion, visible only to guests.
+      show_post_cta_label: Show Join CTA after a certain number of posts for guests
+      show_post_cta_help: Display a Log In / Sign Up card between posts in a discussion, visible only to guests. Use the position setting to choose after which post it appears.
 
       position_label: CTA position (after which post number)
       position_help: Insert the CTA banner between this post number and the next one.
