@@ -1,0 +1,39 @@
+{
+    "name": "ramon/guest-cta",
+    "description": "Hide links from guests and show a Login/Sign Up CTA between posts in discussions.",
+    "keywords": [
+        "flarum",
+        "extension",
+        "guest",
+        "cta",
+        "signup",
+        "login"
+    ],
+    "type": "flarum-extension",
+    "license": "MIT",
+    "require": {
+        "flarum/core": "^2.0.0"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "1.x-dev"
+        },
+        "flarum-extension": {
+            "title": "Guest CTA",
+            "category": "feature",
+            "icon": {
+                "image": "icon.svg"
+            }
+        }
+    },
+    "authors": [
+        {
+            "name": "Ramon Guilherme",
+            "email": "ramon@ramonguilherme.com.br",
+            "homepage": "https://ramonguilherme.com.br",
+            "role": "Developer"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

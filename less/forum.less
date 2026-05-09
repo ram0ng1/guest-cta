@@ -1,0 +1,119 @@
+// ── Guest CTA between posts ────────────────────────────────────────────────
+// Flarum core renders a 1px ::after divider on every .PostStream-item that has
+// a sibling .PostStream-item. Suppress those dividers next to the CTA — its own
+// border/background already provides visual separation.
+//
+// Position 1: CTA is inside .PostStream-afterFirstPost (post #1 → afterFirstPost → post #2)
+// Position 2-5: CTA is .PostStream-guestCta (post N → CTA → post N+1)
+.PostStream-item:has(+ .PostStream-afterFirstPost)::after,
+.PostStream-afterFirstPost::after,
+.PostStream-item:has(+ .PostStream-guestCta)::after,
+.PostStream-guestCta::after {
+    display: none;
+}
+
+.GuestCta-wrapper {
+    margin: 12px 0;
+}
+
+.GuestCta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    padding: 16px 24px;
+    text-align: center;
+    background: fade(@primary-color, 6%);
+    border-radius: 12px;
+    border: 1px solid fade(@primary-color, 15%);
+}
+
+.GuestCta-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.GuestCta-buttons {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.GuestCta-or {
+    font-size: 12px;
+    color: var(--muted-color);
+}
+
+.GuestCta-btn {
+    padding: 7px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1;
+    transition: background 0.15s, color 0.15s;
+
+    &--login {
+        background: @primary-color;
+        color: #fff;
+
+        &:hover { background: darken(@primary-color, 8%); }
+    }
+
+    &--signup {
+        background: transparent;
+        color: @primary-color;
+        border: 1.5px solid @primary-color;
+
+        &:hover { background: fade(@primary-color, 8%); }
+    }
+}
+
+@media @phone {
+    .GuestCta {
+        flex-direction: column;
+    }
+
+    .GuestCta-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+// ── Guest link gating ──────────────────────────────────────────────────────
+// External links inside post bodies are replaced with a lock-icon + label pill;
+// clicking opens the Flarum Login modal.
+.GuestCtaLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    vertical-align: middle;
+    background: fade(@primary-color, 10%);
+    border: 1px solid fade(@primary-color, 25%);
+    border-radius: 4px;
+    color: @primary-color;
+    cursor: pointer;
+    font-size: 0.85em;
+    font-weight: 600;
+    line-height: 1;
+    padding: 2px 7px 2px 5px;
+    transition: background 0.12s;
+    white-space: nowrap;
+
+    &:hover {
+        background: fade(@primary-color, 20%);
+    }
+
+    .fa-lock { font-size: 0.8em; }
+}
+
+.GuestCtaLink-label {
+    line-height: 1;
+}
