@@ -1,0 +1,64 @@
+name: Sincronizar Branches com Main
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# §35.13 C1 — default-deny.
+permissions: {}
+
+concurrency:
+  group: sync-branches
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sincronizar branches com main
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configurar Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Sincronizar branches com main
+        run: |
+          git fetch --all
+
+          BRANCHES=$(git branch -r \
+            | grep -v 'HEAD' \
+            | grep -v 'origin/main' \
+            | grep -v 'origin/copilot/' \
+            | grep -v 'origin/dependabot/' \
+            | grep -v 'origin/claude/' \
+            | sed 's|origin/||' \
+            | tr -d ' ')
+
+          for branch in $BRANCHES; do
+            echo "▶ Sincronizando branch: $branch"
+
+            git checkout -B "$branch" "origin/$branch"
+
+            if ! git merge-base origin/main "origin/$branch" >/dev/null 2>&1; then
+              echo "⚠️  '$branch' não compartilha histórico com main (pré-reescrita) — pulando"
+              continue
+            fi
+
+            if git merge origin/main --no-edit -m "chore: sync with main"; then
+              git push origin "$branch"
+              echo "✅ Branch '$branch' sincronizada com sucesso"
+            else
+              echo "⚠️  Conflito ao sincronizar '$branch' com main — pulando"
+              git merge --abort 2>/dev/null || true
+            fi
+          done

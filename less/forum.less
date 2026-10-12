@@ -3,10 +3,12 @@
 // a sibling .PostStream-item. Suppress those dividers next to the CTA — its own
 // border/background already provides visual separation.
 //
-// Position 1: CTA is inside .PostStream-afterFirstPost (post #1 → afterFirstPost → post #2)
-// Position 2-5: CTA is .PostStream-guestCta (post N → CTA → post N+1)
-.PostStream-item:has(+ .PostStream-afterFirstPost)::after,
-.PostStream-afterFirstPost::after,
+// Position 1: CTA is inside .PostStream-afterFirstPost (post #1 → afterFirstPost → post #2).
+// Other extensions put their own items in there too, and signed-in readers see
+// those without any CTA — so only touch it while the CTA is actually inside.
+// Anywhere else: CTA is .PostStream-guestCta (post N → CTA → post N+1)
+.PostStream-item:has(+ .PostStream-afterFirstPost > .PostStream-guestCta)::after,
+.PostStream-afterFirstPost:has(> .PostStream-guestCta)::after,
 .PostStream-item:has(+ .PostStream-guestCta)::after,
 .PostStream-guestCta::after {
     display: none;
@@ -33,6 +35,8 @@
     font-size: 14px;
     font-weight: 600;
     color: var(--text-color);
+    // Keeps the line breaks of an admin-written message.
+    white-space: pre-line;
 }
 
 .GuestCta-buttons {

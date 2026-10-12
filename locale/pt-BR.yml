@@ -14,6 +14,11 @@ ramon-guest-cta:
       position_3: "Após o post #3"
       position_4: "Após o post #4"
       position_5: "Após o post #5"
+      position_end: No final da discussão
+
+      cta_text_label: Texto do CTA
+      cta_text_help: Substitui a mensagem padrão em todos os idiomas. Apenas texto simples; as quebras de linha são mantidas. Deixe vazio para usar o padrão traduzido.
+      cta_text_placeholder: => ramon-guest-cta.forum.post_cta.text
 
   forum:
     post_cta:

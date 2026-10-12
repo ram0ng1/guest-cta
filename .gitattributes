@@ -1,0 +1,20 @@
+# Keep development, CI and test infrastructure OUT of the distributed composer
+# package (Packagist dist tarball / `composer archive`). Consumers installing via
+# `composer require ramon/guest-cta` only need src/, js/dist, less/, locale/,
+# extend.php and composer.json — not the test suite or tooling.
+#
+# `require-dev` dependencies (phpunit, phpstan) are never installed for consumers
+# anyway; export-ignore here removes the test FILES from the shipped archive too.
+
+/.github            export-ignore
+/tests              export-ignore
+/js/src             export-ignore
+/js/node_modules    export-ignore
+/js/eslint-local-rules export-ignore
+/js/eslint.config.mjs  export-ignore
+/.gitattributes     export-ignore
+/.gitignore         export-ignore
+/.semgrepignore     export-ignore
+/phpunit.xml.dist   export-ignore
+/.phpunit.cache     export-ignore
+/phpstan.neon       export-ignore

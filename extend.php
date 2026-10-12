@@ -2,6 +2,7 @@
 
 namespace Ramon\GuestCta;
 
+use Flarum\Api\Resource\ForumResource;
 use Flarum\Extend;
 
 return [
@@ -15,10 +16,18 @@ return [
     new Extend\Locales(__DIR__.'/locale'),
 
     (new Extend\Settings())
-        ->serializeToForum('guestCtaShowPostCta', 'guest-cta.show_post_cta', 'boolval')
-        ->serializeToForum('guestCtaPosition', 'guest-cta.position')
-        ->serializeToForum('guestCtaHideLinks', 'guest-cta.hide_links', 'boolval')
         ->default('guest-cta.show_post_cta', false)
         ->default('guest-cta.position', '1')
+        ->default('guest-cta.cta_text', '')
         ->default('guest-cta.hide_links', false),
+
+    // Sent to guests only. See ForumAttributes.
+    (new Extend\ApiResource(ForumResource::class))
+        ->fields(Api\ForumAttributes::class),
+
+    // Links are taken out of the post on the server, so a guest never
+    // receives the address at all.
+    (new Extend\Formatter())
+        ->configure(Formatter\ConfigureGuestLinks::class)
+        ->render(Formatter\GateGuestLinks::class),
 ];

@@ -1,0 +1,7 @@
+parameters:
+    level: 5
+    paths:
+        - src
+        - extend.php
+    # Flarum core is reflected directly from vendor/ (no flarum/phpstan stub).
+    treatPhpDocTypesAsCertain: false
