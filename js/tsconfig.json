@@ -10,7 +10,11 @@
         "@types/**/*"
     ],
     "compilerOptions": {
+        "rootDir": "./src",
         "declarationDir": "./dist-typings",
+        // flarum-tsconfig still sets `moduleResolution: node`, and the `paths`
+        // below need `baseUrl`; TypeScript 6 deprecates both.
+        "ignoreDeprecations": "6.0",
         "baseUrl": ".",
         "paths": {
             "flarum/*": [
