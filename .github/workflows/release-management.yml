@@ -103,16 +103,16 @@ jobs:
           fi
           echo "Bump: $BUMP (labels do PR: ${PR_LABELS:-<dispatch manual>})"
 
-          # 2. Última tag de versão (semver). O glob 'v[0-9]*' e o sort por
-          #    versão pegam a maior tag; %%-* descarta qualquer sufixo legado
-          #    de pré-release (ex.: -beta), pois agora publicamos estáveis.
-          LATEST="$(git tag --list 'v[0-9]*' --sort=-v:refname | head -n1 || true)"
-          LATEST="${LATEST:-v0.0.0}"
-          CORE="${LATEST#v}"
-          CORE="${CORE%%-*}"
+          # 2. Maior versão já publicada. As releases deste repositório são tags
+          #    SEM prefixo (2.0.0, 2.0.1, …), então o glob 'v[0-9]*' herdado do
+          #    avocado não achava nenhuma e a contagem recomeçava do zero. Aqui
+          #    entram as duas grafias; o prefixo e qualquer sufixo de pré-release
+          #    (ex.: -beta) saem ANTES de ordenar, senão "v0.0.1" passaria na
+          #    frente de "2.0.2" (ordenação por nome põe 'v' depois de dígito).
+          CORE="$(git tag --list | sed -nE 's/^v?([0-9]+\.[0-9]+\.[0-9]+)(-.*)?$/\1/p' | sort -V | tail -n1)"
+          CORE="${CORE:-0.0.0}"
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CORE"
-          MAJOR="${MAJOR:-0}"; MINOR="${MINOR:-0}"; PATCH="${PATCH:-0}"
-          echo "Última tag: $LATEST -> base ${MAJOR}.${MINOR}.${PATCH}"
+          echo "Maior versão publicada: ${MAJOR}.${MINOR}.${PATCH}"
 
           # 3. Incrementa conforme o bump.
           case "$BUMP" in
@@ -123,13 +123,17 @@ jobs:
           esac
 
           VERSION="${MAJOR}.${MINOR}.${PATCH}"
-          TAG="v${VERSION}"
+          # Mesma grafia das releases anteriores: sem "v".
+          TAG="${VERSION}"
 
-          # 4. Garante idempotência — não republica uma tag existente.
-          if git rev-parse "refs/tags/${TAG}" >/dev/null 2>&1; then
-            echo "::error::A tag ${TAG} já existe — nada a publicar."
-            exit 1
-          fi
+          # 4. Garante idempotência — não republica uma versão existente, em
+          #    nenhuma das duas grafias.
+          for EXISTING in "${VERSION}" "v${VERSION}"; do
+            if git rev-parse "refs/tags/${EXISTING}" >/dev/null 2>&1; then
+              echo "::error::A tag ${EXISTING} já existe — nada a publicar."
+              exit 1
+            fi
+          done
 
           echo "Nova versão: ${VERSION} (tag ${TAG})"
           {

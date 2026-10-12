@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: 'Tag da release (ex: v2.1.19-beta)'
+        description: 'Tag da release (ex: 2.0.3)'
         required: true
       release_body:
         description: 'Corpo/descrição da release'
