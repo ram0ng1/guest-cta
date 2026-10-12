@@ -102,7 +102,11 @@ jobs:
           cat > install.yml <<-EOF
           baseUrl: http://127.0.0.1:8080
           databaseConfiguration:
-            driver: mysql
+            # Tem que ser o driver do servico acima. Com `mysql` contra um
+            # MariaDB, o Laravel gera `CAST(... AS JSON)`, que o MariaDB nao
+            # aceita: o install passa, mas criar um post estoura em db_error
+            # (a notificacao de assinatura usa essa query).
+            driver: mariadb
             host: 127.0.0.1
             port: 3306
             database: flarum
@@ -190,11 +194,15 @@ jobs:
           fi
           ls -la /tmp/lhci-out
 
-      - name: Tornar log do PHP visivel em caso de falha
+      # O log do Flarum e onde fica a excecao de verdade: a API so devolve o
+      # codigo (`db_error`, por exemplo), nunca a mensagem.
+      - name: Tornar logs visiveis em caso de falha
         if: failure()
         run: |
           echo "---- /tmp/php.log ----"
           tail -200 /tmp/php.log || true
+          echo "---- storage/logs (Flarum) ----"
+          grep -h -m 20 'flarum\.ERROR' "${FLARUM_TEST_DIR}"/storage/logs/*.log | cut -c1-1500 || true
 
       - name: Subir artefato com resultados (PR)
         if: github.event_name == 'pull_request'
