@@ -1,0 +1,55 @@
+# Dependabot: composer (/), npm (/js) e github-actions (/), semanal.
+# `groups` junta cada ecossistema num ÚNICO PR por semana — acaba com a
+# cascata de conflito de vários PRs de action tocando os mesmos arquivos de
+# workflow, e reduz o volume. Labels batem com .github/pr-labeler.yml.
+# Grupo cobre só minor+patch (auto-merge verde); MAJOR sai como PR
+# individual para revisão manual, sem contaminar o grupo.
+version: 2
+updates:
+  - package-ecosystem: composer
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencias
+    groups:
+      composer:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: npm
+    directory: /js
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencias
+    groups:
+      npm:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencias
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"

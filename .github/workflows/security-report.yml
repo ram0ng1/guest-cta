@@ -1,0 +1,45 @@
+name: Relatório de Code Scanning
+
+# Imprime no log todos os alertas ABERTOS de code scanning (CodeQL,
+# Semgrep, Psalm), com regra, severidade e localização. Só leitura;
+# roda ao publicar este arquivo e por dispatch manual.
+on:
+  push:
+    paths:
+      - '.github/workflows/security-report.yml'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  report:
+    name: Listar alertas abertos
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: read
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920  # v2.20.0
+        with:
+          egress-policy: audit
+
+      - name: Listar alertas
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            let alerts = [];
+            try {
+              alerts = await github.paginate(github.rest.codeScanning.listAlertsForRepo,
+                { owner, repo, state: 'open', per_page: 100 });
+            } catch (e) {
+              core.info(`code scanning indisponível: ${e.status} ${e.message}`);
+              return;
+            }
+            core.info(`ALERTAS_ABERTOS=${alerts.length}`);
+            for (const a of alerts) {
+              const loc = a.most_recent_instance?.location || {};
+              const sev = a.rule?.security_severity_level || a.rule?.severity || '?';
+              const tool = a.tool?.name || '?';
+              core.info(`ALERTA #${a.number} | ${tool} | ${sev} | ${a.rule?.id} | ${loc.path}:${loc.start_line} | ${a.most_recent_instance?.message?.text?.slice(0,160).replace(/\n/g,' ')}`);
+            }

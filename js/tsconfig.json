@@ -1,7 +1,11 @@
 {
+    // Use Flarum's tsconfig as a starting point
     "extends": "flarum-tsconfig",
+    // Core's typings are read from this extension's own vendor/ (CI, standalone
+    // checkout) or, failing that, from the Flarum install it is symlinked into.
     "include": [
         "src/**/*",
+        "../vendor/*/*/js/dist-typings/@types/**/*",
         "../../../vendor/*/*/js/dist-typings/@types/**/*",
         "@types/**/*"
     ],
@@ -9,7 +13,10 @@
         "declarationDir": "./dist-typings",
         "baseUrl": ".",
         "paths": {
-            "flarum/*": ["../../../vendor/flarum/core/js/dist-typings/*"]
+            "flarum/*": [
+                "../vendor/flarum/core/js/dist-typings/*",
+                "../../../vendor/flarum/core/js/dist-typings/*"
+            ]
         }
     }
 }

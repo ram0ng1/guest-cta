@@ -1,0 +1,67 @@
+name: Limpar Releases Antigas
+
+on:
+  workflow_dispatch:
+
+# §35.13 C1 — default-deny.
+permissions: {}
+
+# §35.13 I4 — uma execução por vez (operação destrutiva).
+concurrency:
+  group: cleanup-releases
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    name: Manter apenas as 5 últimas releases
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920  # v2.20.0
+        with:
+          egress-policy: audit
+
+      - name: Apagar releases antigas
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const KEEP = 5;
+
+            const releases = await github.paginate(
+              github.rest.repos.listReleases,
+              { owner: context.repo.owner, repo: context.repo.repo, per_page: 100 }
+            );
+
+            // Sort by published_at descending (newest first)
+            releases.sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
+
+            const toDelete = releases.slice(KEEP);
+
+            console.log(`Total de releases: ${releases.length}`);
+            console.log(`Mantendo as ${KEEP} mais recentes, apagando ${toDelete.length}`);
+
+            for (const release of toDelete) {
+              console.log(`Apagando release: ${release.tag_name} (id: ${release.id})`);
+
+              await github.rest.repos.deleteRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: release.id,
+              });
+
+              try {
+                await github.rest.git.deleteRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `tags/${release.tag_name}`,
+                });
+                console.log(`  Tag ${release.tag_name} apagada`);
+              } catch (e) {
+                console.log(`  Tag ${release.tag_name} não encontrada ou já apagada`);
+              }
+            }
+
+            console.log('✅ Limpeza concluída!');
